@@ -1,0 +1,24 @@
+image: atlassian/default-image:3
+
+pipelines:
+  branches:
+    training-cicd:
+      - step:
+          name: Build and Pack
+          script:
+            - apt update && apt install -y zip
+            - zip -r code.zip . 
+          artifacts:
+            - code.zip
+      - step:
+          name: Deploy to training-cicd
+          script:
+            - pipe: atlassian/azure-web-apps-deploy:1.1.0
+              variables:
+                ConnectionType: 'AzureRM'
+                AZURE_APP_ID: $App_ID
+                AZURE_PASSWORD: $App_Secret
+                AZURE_TENANT_ID: $DP_IN_Tenant
+                AZURE_RESOURCE_GROUP: '002_Training-cicd'
+                AZURE_APP_NAME: 'testing-app-python'
+                ZIP_FILE: code.zip
